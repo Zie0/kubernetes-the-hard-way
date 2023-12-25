@@ -1,0 +1,29 @@
+---
+- name: Add K8s Community Repository GPG key
+  ansible.builtin.get_url:
+    url: https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version }}/deb/Release.key
+    dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+    mode: '0644'
+    force: true
+- name: Add K8s Community Repository source
+  ansible.builtin.apt_repository:
+    filename: kubernetes.list
+    repo: 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version }}/deb/ /'
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install Kubernetes packages.
+  package:
+    name: "{{ item.name | default(item) }}"
+    state: "{{ item.state | default('present') }}"
+  notify: restart kubelet
+  with_items: "{{ kubernetes_packages }}"
+  
+# Set /var/lib/dpkg/status to Hold packages at kubernetes_version during system updates
+- name: Hold Kubernetes packages.
+  ansible.builtin.dpkg_selections:
+    name: "{{ item.name | default(item) }}"
+    selection: hold
+  with_items: "{{ kubernetes_packages }}"

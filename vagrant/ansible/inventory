@@ -1,0 +1,10 @@
+[kube]
+master-1 ansible_host=192.168.56.11 kubernetes_role=master
+master-2 ansible_host=192.168.56.12 kubernetes_role=master
+worker-1 ansible_host=192.168.56.21 kubernetes_role=worker
+worker-2 ansible_host=192.168.56.22 kubernetes_role=worker
+loadbalancer ansible_host=192.168.56.30 kubernetes_role=loadbalancer
+
+[kube:vars]
+ansible_ssh_user=vagrant
+ansible_ssh_private_key_file=~/.vagrant.d/insecure_private_key
